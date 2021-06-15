@@ -7,7 +7,7 @@ RUN echo "Upgrading apt packages"
 RUN sudo apt-get upgrade -qq
 
 #install curl cmd
-RUN apt install curl -y
+RUN sudo apt install curl -y
 
 RUN echo "Installing Java"
 ARG JAVA_VERSION=jdk8u242-b08
