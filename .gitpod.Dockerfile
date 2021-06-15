@@ -1,18 +1,20 @@
 FROM gitpod/workspace-full
 
+USER root
+
 #update and upgrade apt packages
 RUN echo "Updating apt packages"
 RUN sudo apt-get update -qq
-RUN echo "Upgrading apt packages"
-RUN sudo apt-get upgrade -qq
 
 #install curl cmd
 RUN sudo apt install curl -y
 
 RUN echo "Installing Java"
-ARG JAVA_VERSION=jdk8u242-b08
-ARG JAVA_BINARY_URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/${JAVA_VERSION}/OpenJDK8U-jdk_x64_linux_hotspot_8u242b08.tar.gz
-ARG JAVA_SHA=f39b523c724d0e0047d238eb2bb17a9565a60574cf651206c867ee5fc000ab43
+ENV JAVA_VERSION_MAJOR=8u292
+ENV JAVA_VERSION_MINOR=b10
+
+ARG JAVA_BINARY_URL=https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk${JAVA_VERSION_MAJOR}-${JAVA_VERSION_MINOR}/OpenJDK8U-jdk_x64_linux_hotspot_${JAVA_VERSION_MAJOR}${JAVA_VERSION_MINOR}.tar.gz
+ARG JAVA_SHA=0949505fcf42a1765558048451bb2a22e84b3635b1a31dd6191780eeccaa4ada
 RUN echo "Downloading java jdk"
 RUN curl -LfsSo /tmp/openjdk.tar.gz ${JAVA_BINARY_URL} >> /dev/null && \
     \
@@ -33,16 +35,12 @@ ENV PATH="/opt/java/openjdk/bin:$PATH"
 
 # Downloading and installing Maven
 ENV MAVEN_HOME=/opt/maven
-ARG MAVEN_VERSION=3.6.1
-ARG SHA=b4880fb7a3d81edd190a029440cdf17f308621af68475a4fe976296e71ff4a4b546dd6d8a58aaafba334d309cc11e638c52808a4b0e818fc0fd544226d952544
+ARG MAVEN_VERSION=3.6.3
 ARG BASE_URL=https://apache.osuosl.org/maven/maven-3/${MAVEN_VERSION}/binaries
 
 RUN mkdir -p /opt/maven /opt/maven/ref \
   && echo "Downlaoding maven" \
   && curl -fsSL -o /tmp/apache-maven.tar.gz ${BASE_URL}/apache-maven-${MAVEN_VERSION}-bin.tar.gz \
-  \
-  && echo "Checking download hash" \
-  && echo "${SHA}  /tmp/apache-maven.tar.gz" | sha512sum -c - \
   \
   && echo "Unziping maven" \
   && tar -xzf /tmp/apache-maven.tar.gz -C $MAVEN_HOME --strip-components=1 \
@@ -56,7 +54,7 @@ ENV MAVEN_CONFIG "$USER_HOME/.m2"
 # Downloading and installing Gradle
 # 1- Define a constant with the version of gradle you want to install
 ENV GRADLE_HOME=/opt/gradle
-ARG GRADLE_VERSION=4.0.1
+ENV GRADLE_VERSION=4.0.1
 
 # 2- Define the URL where gradle can be downloaded from
 ARG GRADLE_BASE_URL=https://services.gradle.org/distributions
@@ -80,10 +78,10 @@ RUN mkdir -p $GRADLE_HOME $GRADLE_HOME/ref \
   && rm -f /tmp/gradle.zip \
   && sudo ln -s $GRADLE_HOME/gradle-${GRADLE_VERSION} /usr/bin/gradle
 
-# 5- Define environmental variables required by gradle
-ENV GRADLE_VERSION 4.0.1
-ENV GRADLE_USER_HOME $USER_HOME/cache
+USER gitpod
 
+# 5- Define environmental variables required by gradle
+ENV GRADLE_USER_HOME $USER_HOME/cache
 ENV PATH $PATH:$GRADLE_HOME/bin
 
 VOLUME $GRADLE_USER_HOME
