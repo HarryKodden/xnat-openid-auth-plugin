@@ -46,6 +46,11 @@ configurations {
         exclude group: "javax.transaction", module: "jta"
         exclude group: "edu.ucar", module: "netcdf"
     }
+    testCompile {
+        exclude group: "org.slf4j", module: "slf4j-log4j12"
+        exclude group: "org.slf4j", module: "slf4j-simple"
+        exclude group: "edu.ucar", module: "netcdf"
+    }
 }
 
 dependencyManagement.imports {
@@ -64,6 +69,10 @@ dependencies {
 
     testImplementation "junit:junit"
     testImplementation "org.springframework:spring-test"
+    testImplementation "org.nrg.xnat:web:${vXnat}"
+    testImplementation "com.github.tomakehurst:wiremock:2.21.0"
+    testImplementation "org.mockito:mockito-core:2.25.0"
+    
 }
 
 java {
